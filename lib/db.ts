@@ -13,8 +13,19 @@ export async function connectDB() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI is not configured");
   if (cache.conn) return cache.conn;
   if (!cache.promise) {
-    cache.promise = mongoose.connect(MONGODB_URI, { dbName: "hotel-kausi", bufferCommands: false });
+    cache.promise = mongoose.connect(MONGODB_URI, {
+      dbName: "hotel-kausi",
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 8000,
+      connectTimeoutMS: 8000,
+    });
   }
-  cache.conn = await cache.promise;
-  return cache.conn;
+  try {
+    cache.conn = await cache.promise;
+    return cache.conn;
+  } catch (error) {
+    cache.promise = null;
+    cache.conn = null;
+    throw error;
+  }
 }

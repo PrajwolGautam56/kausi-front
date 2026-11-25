@@ -25,7 +25,25 @@ export default function AdminApp() {
 
 function Login({ onSuccess }: { onSuccess: () => void }) {
   const [error, setError] = useState(""); const [loading, setLoading] = useState(false);
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => { e.preventDefault(); setLoading(true); setError(""); const data = Object.fromEntries(new FormData(e.currentTarget)); const res = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }); const json = await res.json(); setLoading(false); if (res.ok) onSuccess(); else setError(json.error); };
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    const data = Object.fromEntries(new FormData(e.currentTarget));
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 15000);
+    try {
+      const res = await fetch("/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data), signal: controller.signal });
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) onSuccess();
+      else setError(json.error || "Login failed. Please check the deployment configuration.");
+    } catch (requestError) {
+      setError(requestError instanceof DOMException && requestError.name === "AbortError" ? "Login request timed out. Check MongoDB Atlas Network Access and Vercel environment variables." : "Could not reach the login service. Please try again.");
+    } finally {
+      window.clearTimeout(timeout);
+      setLoading(false);
+    }
+  };
   return <main className="login-page"><div className="login-visual"><Image src="/images/hotel-exterior-night.jpg" fill alt="Hotel Kausi at night" sizes="60vw" priority /><div className="login-overlay" /><div className="login-quote"><p>“Hospitality lives in the details.”</p><span>HOTEL KAUSI · POKHARA</span></div></div><div className="login-panel"><div className="login-box"><Link className="admin-brand" href="/"><Image src="/brand/hotel-kausi-mark.svg" alt="" width={70} height={60} /><span><strong>Hotel Kausi</strong><small>PROPERTY MANAGEMENT</small></span></Link><p className="admin-kicker">Staff access</p><h1>Welcome back</h1><p className="login-intro">Sign in to manage reservations, rates, rooms and website content.</p><form onSubmit={submit}><label>Email address<input name="email" type="email" defaultValue="kausi@kritechsolution.com" required /></label><label>Password<input name="password" type="password" autoComplete="current-password" required /></label>{error && <p className="login-error">{error}</p>}<button className="admin-primary" disabled={loading}>{loading ? "Signing in…" : "Sign in securely"}</button></form><p className="demo-hint"><Sparkles /> Authorized Hotel Kausi staff access only.</p><Link href="/" className="back-site">← Back to hotel website</Link></div></div></main>;
 }
 
