@@ -146,7 +146,6 @@ function ContentEditor({ content, setContent, notify }: { content: SiteContent; 
       inclusions: ["Accommodation", "Daily breakfast"],
     }],
   }));
-  const removePackage = (index: number) => setDraft((current) => ({ ...current, packages: current.packages.filter((_, i) => i !== index) }));
   const setPhoneList = (key: "managementPhones" | "hotlinePhones", value: string) => setDraft((current) => ({
     ...current,
     contact: { ...current.contact, [key]: value.split("\n").map((phone) => phone.trim()).filter(Boolean) },
@@ -162,9 +161,9 @@ function ContentEditor({ content, setContent, notify }: { content: SiteContent; 
       </section>
       <section className="admin-card editor-card">
         <div className="editor-section">
-          <div className="editor-section-head"><div><span>Packages</span><h2>Offers & experiences</h2></div><button className="admin-secondary" onClick={addPackage}><Plus /> Add package</button></div>
+          <div className="editor-section-head"><div><span>Packages</span><h2>Offers & experiences</h2><p className="editor-help">Create as many offers as needed. Every package is shown on the homepage after publishing.</p></div><button className="admin-secondary" onClick={addPackage}><Plus /> Create package</button></div>
           {draft.packages.map((pkg, index) => <div className="package-editor expanded" key={pkg.id}>
-            <div className="package-preview"><Image src={pkg.image} alt="" width={120} height={100} /><button type="button" aria-label={`Remove ${pkg.title}`} onClick={() => removePackage(index)}><X /></button></div>
+            <div className="package-preview"><Image src={pkg.image} alt="" width={120} height={100} /><span>Offer {index + 1}</span></div>
             <div>
               <label>Package title<input value={pkg.title} onChange={(e) => updatePackage(index, { title: e.target.value })} /></label>
               <label>Short description<textarea rows={2} value={pkg.subtitle} onChange={(e) => updatePackage(index, { subtitle: e.target.value })} /></label>
