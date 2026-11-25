@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 150" role="img" aria-labelledby="title">
+  <title id="title">Hotel Kausi</title>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 120V45h25v75M127 120V45h25v75M17 120h146" stroke-width="7"/>
+    <path d="M39 53h103M39 68h103" stroke-width="5"/>
+    <path d="M60 120V79h60v41M69 79l21-17 21 17" stroke="#d85b2a" stroke-width="7"/>
+    <path d="M75 94h30M75 105h30" stroke="#d85b2a" stroke-width="5"/>
+    <path d="M52 45a38 38 0 0 1 76 0" stroke-width="6"/>
+    <path d="M67 42l16-14 9 8 11-13 12 19" stroke="#a6a6a6" stroke-width="3"/>
+    <path d="M88 18l4 3 4-3M108 24l4 3 4-3" stroke="#6b2f25" stroke-width="2"/>
+  </g>
+</svg>
