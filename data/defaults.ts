@@ -88,8 +88,10 @@ export const defaultContent: SiteContent = {
     },
   ],
   contact: {
-    phone: "+977 61 590330",
-    altPhone: "+977 9856061823",
+    phone: "+977 9714646180",
+    altPhone: "+977 61 590330",
+    managementPhones: ["+977 985-1129254", "+977 985-6026510", "+977 985-6061823"],
+    hotlinePhones: ["+977 9714646180", "+977 61 590330"],
     email: "htlkausipkr@gmail.com",
     address: "Lakeside-6, Main Lane between 4th & 5th Street, Pokhara 33700, Nepal",
   },

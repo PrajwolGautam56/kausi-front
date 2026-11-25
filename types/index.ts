@@ -30,7 +30,14 @@ export type SiteContent = {
   about: { eyebrow: string; title: string; description: string };
   rooms: Room[];
   packages: Package[];
-  contact: { phone: string; altPhone: string; email: string; address: string };
+  contact: {
+    phone: string;
+    altPhone: string;
+    managementPhones: string[];
+    hotlinePhones: string[];
+    email: string;
+    address: string;
+  };
 };
 
 export type Booking = {

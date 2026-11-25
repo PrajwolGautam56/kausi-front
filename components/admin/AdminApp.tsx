@@ -9,7 +9,7 @@ import {
   Gauge, ImageIcon, LayoutDashboard, LogOut, Menu, Pencil, Plus, Save, Search, Settings, Sparkles,
   X,
 } from "lucide-react";
-import type { Booking, RateOverride, SiteContent } from "@/types";
+import type { Booking, Package, RateOverride, SiteContent } from "@/types";
 import { defaultContent } from "@/data/defaults";
 
 type Tab = "overview" | "bookings" | "calendar" | "rooms" | "content" | "media";
@@ -117,9 +117,66 @@ function RoomsEditor({ content, setContent, notify }: { content: SiteContent; se
 }
 
 function ContentEditor({ content, setContent, notify }: { content: SiteContent; setContent: (c: SiteContent) => void; notify: (s: string) => void }) {
-  const [draft, setDraft] = useState(content); const save = async () => { const res = await fetch("/api/content", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) }); if (res.ok) { setContent(draft); notify("Website content published"); } };
-  const changePackage = (i: number, key: "title" | "subtitle" | "priceLabel", value: string) => setDraft({ ...draft, packages: draft.packages.map((p, j) => j === i ? { ...p, [key]: value } : p) });
-  return <><PageTitle kicker="Live website" title="Content editor" action={<div className="title-actions"><a className="admin-secondary" href="/" target="_blank"><Eye /> Preview</a><button className="admin-primary" onClick={save}><Save /> Publish changes</button></div>} /><div className="editor-layout"><section className="admin-card editor-card"><div className="editor-section"><span>Homepage hero</span><h2>First impression</h2><label>Eyebrow<input value={draft.hero.eyebrow} onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })} /></label><label>Main headline<textarea rows={2} value={draft.hero.title} onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, title: e.target.value } })} /></label><label>Introduction<textarea rows={3} value={draft.hero.subtitle} onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, subtitle: e.target.value } })} /></label></div><div className="editor-section"><span>About</span><h2>Hotel story</h2><label>Section title<input value={draft.about.title} onChange={(e) => setDraft({ ...draft, about: { ...draft.about, title: e.target.value } })} /></label><label>Description<textarea rows={5} value={draft.about.description} onChange={(e) => setDraft({ ...draft, about: { ...draft.about, description: e.target.value } })} /></label></div></section><section className="admin-card editor-card"><div className="editor-section"><span>Packages</span><h2>Offers & experiences</h2>{draft.packages.map((p, i) => <div className="package-editor" key={p.id}><Image src={p.image} alt="" width={90} height={75} /><div><input value={p.title} onChange={(e) => changePackage(i, "title", e.target.value)} /><textarea rows={2} value={p.subtitle} onChange={(e) => changePackage(i, "subtitle", e.target.value)} /><input value={p.priceLabel} onChange={(e) => changePackage(i, "priceLabel", e.target.value)} /></div></div>)}</div><div className="editor-section"><span>Contact details</span><h2>How guests reach you</h2><label>Phone<input value={draft.contact.phone} onChange={(e) => setDraft({ ...draft, contact: { ...draft.contact, phone: e.target.value } })} /></label><label>Email<input value={draft.contact.email} onChange={(e) => setDraft({ ...draft, contact: { ...draft.contact, email: e.target.value } })} /></label><label>Address<textarea rows={3} value={draft.contact.address} onChange={(e) => setDraft({ ...draft, contact: { ...draft.contact, address: e.target.value } })} /></label></div></section></div></>;
+  const [draft, setDraft] = useState<SiteContent>({
+    ...content,
+    contact: {
+      ...content.contact,
+      managementPhones: content.contact.managementPhones || defaultContent.contact.managementPhones,
+      hotlinePhones: content.contact.hotlinePhones || defaultContent.contact.hotlinePhones,
+    },
+  });
+  const save = async () => {
+    const res = await fetch("/api/content", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });
+    if (res.ok) { setContent(draft); notify("Website content published"); }
+    else notify("Could not publish website content");
+  };
+  const updatePackage = (index: number, fields: Partial<Package>) => setDraft((current) => ({
+    ...current,
+    packages: current.packages.map((pkg, i) => i === index ? { ...pkg, ...fields } : pkg),
+  }));
+  const addPackage = () => setDraft((current) => ({
+    ...current,
+    packages: [...current.packages, {
+      id: `package-${Date.now()}`,
+      title: "New Hotel Package",
+      subtitle: "Describe the experience included in this package.",
+      image: "/images/deluxe-double-balcony.jpg",
+      priceLabel: "Custom quote",
+      badge: "New offer",
+      inclusions: ["Accommodation", "Daily breakfast"],
+    }],
+  }));
+  const removePackage = (index: number) => setDraft((current) => ({ ...current, packages: current.packages.filter((_, i) => i !== index) }));
+  const setPhoneList = (key: "managementPhones" | "hotlinePhones", value: string) => setDraft((current) => ({
+    ...current,
+    contact: { ...current.contact, [key]: value.split("\n").map((phone) => phone.trim()).filter(Boolean) },
+  }));
+
+  return <>
+    <PageTitle kicker="Live website" title="Content editor" action={<div className="title-actions"><a className="admin-secondary" href="/" target="_blank"><Eye /> Preview</a><button className="admin-primary" onClick={save}><Save /> Publish changes</button></div>} />
+    <div className="editor-layout">
+      <section className="admin-card editor-card">
+        <div className="editor-section"><span>Homepage hero</span><h2>First impression</h2><label>Eyebrow<input value={draft.hero.eyebrow} onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, eyebrow: e.target.value } })} /></label><label>Main headline<textarea rows={2} value={draft.hero.title} onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, title: e.target.value } })} /></label><label>Introduction<textarea rows={3} value={draft.hero.subtitle} onChange={(e) => setDraft({ ...draft, hero: { ...draft.hero, subtitle: e.target.value } })} /></label></div>
+        <div className="editor-section"><span>About</span><h2>Hotel story</h2><label>Section title<input value={draft.about.title} onChange={(e) => setDraft({ ...draft, about: { ...draft.about, title: e.target.value } })} /></label><label>Description<textarea rows={5} value={draft.about.description} onChange={(e) => setDraft({ ...draft, about: { ...draft.about, description: e.target.value } })} /></label></div>
+        <div className="editor-section"><span>Contact details</span><h2>How guests reach you</h2><label>Main hotline<input value={draft.contact.phone} onChange={(e) => setDraft({ ...draft, contact: { ...draft.contact, phone: e.target.value } })} /></label><label>Hotline & reception numbers — one per line<textarea rows={3} value={draft.contact.hotlinePhones.join("\n")} onChange={(e) => setPhoneList("hotlinePhones", e.target.value)} /></label><label>Management team numbers — one per line<textarea rows={4} value={draft.contact.managementPhones.join("\n")} onChange={(e) => setPhoneList("managementPhones", e.target.value)} /></label><label>Email<input value={draft.contact.email} onChange={(e) => setDraft({ ...draft, contact: { ...draft.contact, email: e.target.value } })} /></label><label>Address<textarea rows={3} value={draft.contact.address} onChange={(e) => setDraft({ ...draft, contact: { ...draft.contact, address: e.target.value } })} /></label></div>
+      </section>
+      <section className="admin-card editor-card">
+        <div className="editor-section">
+          <div className="editor-section-head"><div><span>Packages</span><h2>Offers & experiences</h2></div><button className="admin-secondary" onClick={addPackage}><Plus /> Add package</button></div>
+          {draft.packages.map((pkg, index) => <div className="package-editor expanded" key={pkg.id}>
+            <div className="package-preview"><Image src={pkg.image} alt="" width={120} height={100} /><button type="button" aria-label={`Remove ${pkg.title}`} onClick={() => removePackage(index)}><X /></button></div>
+            <div>
+              <label>Package title<input value={pkg.title} onChange={(e) => updatePackage(index, { title: e.target.value })} /></label>
+              <label>Short description<textarea rows={2} value={pkg.subtitle} onChange={(e) => updatePackage(index, { subtitle: e.target.value })} /></label>
+              <div className="package-field-row"><label>Badge<input value={pkg.badge || ""} onChange={(e) => updatePackage(index, { badge: e.target.value })} /></label><label>Price label<input value={pkg.priceLabel} onChange={(e) => updatePackage(index, { priceLabel: e.target.value })} /></label></div>
+              <label>Image path or Cloudinary URL<input value={pkg.image} onChange={(e) => updatePackage(index, { image: e.target.value })} /></label>
+              <label>Package inclusions — one per line<textarea rows={5} value={pkg.inclusions.join("\n")} onChange={(e) => updatePackage(index, { inclusions: e.target.value.split("\n").map((item) => item.trim()).filter(Boolean) })} /></label>
+            </div>
+          </div>)}
+        </div>
+      </section>
+    </div>
+  </>;
 }
 
 function MediaLibrary({ content, notify }: { content: SiteContent; notify: (s: string) => void }) {

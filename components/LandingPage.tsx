@@ -62,7 +62,7 @@ export default function LandingPage({ initialContent }: { initialContent: SiteCo
           <a href="#location" onClick={() => setMenuOpen(false)}>Location</a>
         </nav>
         <div className="header-actions">
-          <a className="phone-link" href="tel:+97761590330"><Phone size={16} /> +977 61 590330</a>
+          <a className="phone-link" href={`tel:${content.contact.phone.replace(/[^+\d]/g, "")}`}><Phone size={16} /> {content.contact.phone}</a>
           <button className="button button-dark" onClick={() => openBooking()}>Reserve your stay</button>
           <button className="menu-button" aria-label="Toggle menu" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button>
         </div>
@@ -201,7 +201,14 @@ export default function LandingPage({ initialContent }: { initialContent: SiteCo
           <div className="footer-brand"><Image src="/brand/hotel-kausi-mark.svg" alt="" width={80} height={68} /><h3>Hotel Kausi</h3><p>A modern boutique experience in the heart of Pokhara Lakeside.</p><div className="socials"><a href="https://www.facebook.com/hotelkausi" aria-label="Facebook"><Facebook /></a><a href="#" aria-label="Instagram"><Instagram /></a></div></div>
           <div><h4>Explore</h4><a href="#story">Our story</a><a href="#rooms">Rooms</a><a href="#dining">Dining</a><a href="#experiences">Packages</a></div>
           <div><h4>Guest services</h4><a href="#rooms">Book a room</a><a href="#location">Directions</a><a href={`tel:${content.contact.phone}`}>Airport transfer</a><a href={`mailto:${content.contact.email}`}>Contact us</a></div>
-          <div className="footer-contact"><h4>Find us</h4><p>{content.contact.address}</p><a href={`tel:${content.contact.phone}`}>{content.contact.phone}</a><a href={`tel:${content.contact.altPhone}`}>{content.contact.altPhone}</a><a href={`mailto:${content.contact.email}`}>{content.contact.email}</a></div>
+          <div className="footer-contact">
+            <h4>Find us</h4><p>{content.contact.address}</p>
+            <h4>Hotline & reception</h4>
+            {(content.contact.hotlinePhones || [content.contact.phone, content.contact.altPhone]).map((phone) => <a key={phone} href={`tel:${phone.replace(/[^+\d]/g, "")}`}>{phone}</a>)}
+            <h4>Management team</h4>
+            {(content.contact.managementPhones || ["+977 985-1129254", "+977 985-6026510", "+977 985-6061823"]).map((phone) => <a key={phone} href={`tel:${phone.replace(/[^+\d]/g, "")}`}>{phone}</a>)}
+            <a href={`mailto:${content.contact.email}`}>{content.contact.email}</a>
+          </div>
         </div>
         <div className="footer-bottom page-shell"><span>© {new Date().getFullYear()} Hotel Kausi. All rights reserved.</span><span>A modern boutique experience · Pokhara, Nepal</span><a href="/admin">Staff login</a></div>
       </footer>
